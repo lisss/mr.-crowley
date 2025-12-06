@@ -23,11 +23,6 @@ def main():
         help="Domain to allow crawling (default: same as starting URL domain)",
     )
     parser.add_argument(
-        "--output",
-        default=None,
-        help="Output file to write results to (default: stdout)",
-    )
-    parser.add_argument(
         "--use-storage",
         action="store_true",
         help="Enable Redis storage (default: in-memory for speed)",
@@ -57,7 +52,7 @@ def main():
         use_storage=args.use_storage,
         max_level=args.level,
     )
-    crawler.crawl(args.output)
+    crawler.crawl()
 
 
 if __name__ == "__main__":

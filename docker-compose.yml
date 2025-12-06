@@ -23,12 +23,22 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-    volumes:
-      - ./results.txt:/app/results.txt
     command: sleep infinity
     restart: unless-stopped
     stdin_open: true
     tty: true
+
+  redis-ui:
+    image: rediscommander/redis-commander:latest
+    container_name: crawley-redis-ui
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
 
   test:
     build: .
