@@ -4,14 +4,16 @@ from typing import Set
 
 
 class Storage:
-    def __init__(self, redis_host=None, redis_port=None, redis_db=0):
+    def __init__(self, redis_host=None, redis_port=None, redis_db=0, redis_password=None):
         self.redis_host = redis_host or os.getenv("REDIS_HOST", "localhost")
         self.redis_port = redis_port or int(os.getenv("REDIS_PORT", "6379"))
         self.redis_db = redis_db
+        self.redis_password = redis_password or os.getenv("REDIS_PASSWORD")
         self.client = redis.Redis(
             host=self.redis_host,
             port=self.redis_port,
             db=self.redis_db,
+            password=self.redis_password,
             decode_responses=True,
             socket_connect_timeout=2,
             socket_timeout=2,

@@ -126,6 +126,7 @@ If Redis is unavailable, the crawler automatically falls back to in-memory stora
 Set environment variables to configure Redis connection:
 - `REDIS_HOST`: Redis host (default: `localhost`)
 - `REDIS_PORT`: Redis port (default: `6379`)
+- `REDIS_PASSWORD`: Redis password (optional, required for most hosted Redis services)
 
 ### Accessing Redis Data
 
@@ -182,7 +183,7 @@ LRANGE crawley:queue 0 9
 This project uses GitHub Actions for continuous integration. The CI workflow:
 
 - Runs on push and pull requests to `main`, `master`, and `develop` branches
-- Tests against Python 3.11, 3.12, and 3.13
+- Tests against Python 3.11
 - Sets up Redis service for integration tests
 - Runs all tests with pytest
 - Checks for Python syntax errors
