@@ -1,0 +1,66 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: crawley-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  crawler:
+    build: .
+    container_name: crawley-crawler
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=5000
+      - REDIS_UI_URL=http://localhost:8081
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "5002:5000"
+    volumes:
+      - .:/app
+    command: python web.py
+    restart: unless-stopped
+
+  redis-ui:
+    image: rediscommander/redis-commander:latest
+    container_name: crawley-redis-ui
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  test:
+    build: .
+    container_name: crawley-test
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - .:/app
+    command: pytest tests/ -v
+    profiles:
+      - test
+
+volumes:
+  redis-data:
+

@@ -1,0 +1,60 @@
+name: Fly Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Fly token
+        run: |
+          if [ -z "${FLY_API_TOKEN}" ]; then
+            echo "FLY_API_TOKEN is not set. Add a repo secret named FLY_API_TOKEN (flyctl auth token)." >&2
+            exit 1
+          fi
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Ensure app exists
+        run: |
+          flyctl apps create crowley --auto-confirm || true
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Set Redis secrets if provided (manual)
+        run: |
+          set -e
+          if [ -n "${REDIS_HOST:-}" ] && [ -n "${REDIS_PASSWORD:-}" ]; then
+            echo "Setting Redis secrets from provided values..."
+            flyctl secrets set \
+              REDIS_HOST="$REDIS_HOST" \
+              REDIS_PORT="${REDIS_PORT:-6379}" \
+              REDIS_PASSWORD="$REDIS_PASSWORD" \
+              REDIS_SSL="${REDIS_SSL:-false}" \
+              REDIS_URL="${REDIS_URL:-}" \
+              --app crowley
+          else
+            echo "REDIS_HOST/REDIS_PASSWORD not provided; skipping secret set. Configure secrets in repo settings if needed."
+          fi
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_SSL: ${{ secrets.REDIS_SSL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+
+      - name: Deploy to Fly
+        run: flyctl deploy --remote-only --app crowley
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+

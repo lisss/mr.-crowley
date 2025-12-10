@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: List test files
+      run: |
+        echo "Test files in tests/ directory:"
+        find tests -name "test_*.py" -type f
+        echo ""
+        echo "Expected test files:"
+        echo "  - tests/test_basic.py (architecture tests)"
+        echo "  - tests/test_crawling_level.py (level limiting tests)"
+        echo "  - tests/test_dedup.py (deduplication tests)"
+        echo "  - tests/test_storage.py (Redis integration tests)"
+
+    - name: Run all unit and integration tests
+      env:
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+      run: |
+        echo "=========================================="
+        echo "Running all tests from tests/ directory"
+        echo "=========================================="
+        pytest tests/ -v --tb=short
+        echo ""
+        echo "=========================================="
+        echo "Test execution completed"
+        echo "=========================================="
+
+    - name: Verify all tests were discovered
+      run: |
+        echo "Verifying test discovery..."
+        TEST_COUNT=$(pytest tests/ --co -q 2>/dev/null | grep -E "test_" | wc -l)
+        echo "Discovered $TEST_COUNT test functions"
+        if [ "$TEST_COUNT" -lt 15 ]; then
+          echo "ERROR: Expected at least 15 tests, found $TEST_COUNT"
+          echo "Test discovery output:"
+          pytest tests/ --co -q
+          exit 1
+        fi
+        echo "✓ All tests discovered successfully"
+
+    - name: Check for syntax errors
+      run: |
+        python -m py_compile crawler.py crawley.py deduplicator.py extractor.py fetcher.py frontier.py storage.py
+        python -m py_compile tests/*.py
+        echo "All Python files compile successfully"
+
