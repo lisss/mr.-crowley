@@ -8,36 +8,26 @@ def get_visited_urls():
 
         try:
             storage = Storage()
-        except ValueError as config_error:
-            return (
-                jsonify(
-                    {
-                        "error": str(config_error),
-                        "visited": [],
-                        "total": 0,
-                        "level_distribution": {},
-                    }
-                ),
-                500,
-            )
+        except ValueError as e:
+            return jsonify({
+                "error": str(e),
+                "visited": [],
+                "total": 0,
+                "level_distribution": {},
+            }), 500
 
         try:
             storage.client.ping()
-        except Exception as conn_error:
-            error_msg = str(conn_error)
+        except Exception as e:
+            error_msg = str(e)
             if "localhost" in error_msg or "Connection refused" in error_msg:
                 error_msg = "Redis not configured! Set credentials using: flyctl secrets set REDIS_HOST=your-host REDIS_PASSWORD=your-password"
-            return (
-                jsonify(
-                    {
-                        "error": f"Redis connection failed: {error_msg}",
-                        "visited": [],
-                        "total": 0,
-                        "level_distribution": {},
-                    }
-                ),
-                500,
-            )
+            return jsonify({
+                "error": f"Redis connection failed: {error_msg}",
+                "visited": [],
+                "total": 0,
+                "level_distribution": {},
+            }), 500
 
         visited = storage.client.smembers("crawley:visited")
         visited_list = []
@@ -63,24 +53,16 @@ def get_visited_urls():
             level = item["level"]
             level_distribution[level] = level_distribution.get(level, 0) + 1
 
-        return jsonify(
-            {
-                "visited": visited_list,
-                "total": len(visited_list),
-                "level_distribution": level_distribution,
-            }
-        )
+        return jsonify({
+            "visited": visited_list,
+            "total": len(visited_list),
+            "level_distribution": level_distribution,
+        })
     except Exception as e:
-        return (
-            jsonify(
-                {
-                    "error": str(e),
-                    "traceback": traceback.format_exc(),
-                    "visited": [],
-                    "total": 0,
-                    "level_distribution": {},
-                }
-            ),
-            500,
-        )
-
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "visited": [],
+            "total": 0,
+            "level_distribution": {},
+        }), 500

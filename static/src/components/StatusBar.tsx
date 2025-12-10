@@ -1,5 +1,5 @@
 import React from 'react';
-import { CrawlStatus } from '../types';
+import { CrawlStatus } from '../types/CrawlStatus';
 
 interface StatusBarProps {
     status: CrawlStatus;

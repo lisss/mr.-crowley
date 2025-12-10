@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from crawley import Crawley
+from crawler import Crawley
 from frontier import Frontier
 
 

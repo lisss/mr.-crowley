@@ -4,23 +4,20 @@ import CrawlForm from './CrawlForm';
 import Logs from './Logs';
 import VisitedUrls from './VisitedUrls';
 import { useCrawl } from '../hooks/useCrawl';
-import { getRedisUiUrl } from '../utils/api';
+import { getRedisUiUrl } from '../utils/api/getRedisUiUrl';
 
 export default function App() {
     const { logs, status, isRunning, startCrawl, stopCrawl } = useCrawl();
     const [redisUiUrl, setRedisUiUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        getRedisUiUrl().then(setRedisUiUrl);
+        getRedisUiUrl().then(setRedisUiUrl).catch(() => {});
     }, []);
 
-    const handleViewRedisData = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleRedisClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         if (!redisUiUrl) {
             e.preventDefault();
-            const section = document.getElementById('visited-urls-section');
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            document.getElementById('visited-urls-section')?.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -33,18 +30,14 @@ export default function App() {
 
             <div className="card">
                 <StatusBar status={status} />
-                <CrawlForm 
-                    onSubmit={startCrawl} 
-                    isRunning={isRunning}
-                    onStop={stopCrawl}
-                />
+                <CrawlForm onSubmit={startCrawl} isRunning={isRunning} onStop={stopCrawl} />
                 <div className="links">
-                    <a 
-                        href={redisUiUrl || "#visited-urls-section"} 
-                        className="link-btn" 
+                    <a
+                        href={redisUiUrl || "#visited-urls-section"}
+                        className="link-btn"
                         target={redisUiUrl ? "_blank" : undefined}
                         rel={redisUiUrl ? "noopener noreferrer" : undefined}
-                        onClick={handleViewRedisData}
+                        onClick={handleRedisClick}
                     >
                         View Redis Data
                     </a>
@@ -52,11 +45,9 @@ export default function App() {
             </div>
 
             <Logs logs={logs} />
-            
             <div id="visited-urls-section">
                 <VisitedUrls isRunning={isRunning} />
             </div>
         </div>
     );
 }
-

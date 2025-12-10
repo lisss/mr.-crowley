@@ -2,7 +2,7 @@ import argparse
 import sys
 from urllib.parse import urlparse
 
-from crawley import Crawley
+from crawler import Crawley
 
 
 def main():

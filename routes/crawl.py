@@ -39,6 +39,7 @@ def start_crawl():
             level_value = data.get("level")
             if level_value is not None and level_value != "":
                 cmd.extend(["--level", str(level_value)])
+
             use_storage = data.get("use_storage", False)
             if (
                 not use_storage
@@ -48,8 +49,7 @@ def start_crawl():
                 use_storage = True
             if use_storage:
                 cmd.append("--use-storage")
-                clear_storage = data.get("clear_storage", True)
-                if clear_storage:
+                if data.get("clear_storage", True):
                     cmd.append("--clear-storage")
 
             with crawl_lock:

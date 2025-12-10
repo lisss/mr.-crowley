@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CrawlFormData } from '../types';
+import { CrawlFormData } from '../types/CrawlFormData';
 import { clearLogs } from '../utils/api';
 
 interface CrawlFormProps {
@@ -16,31 +16,20 @@ export default function CrawlForm({ onSubmit, isRunning, onStop }: CrawlFormProp
     const [useStorage, setUseStorage] = useState(false);
     const [clearStorage, setClearStorage] = useState(true);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
         if (isRunning) return;
 
-        const formData: CrawlFormData = { url };
-
-        if (userAgent.trim()) {
-            formData.user_agent = userAgent.trim();
-        }
-        if (allowedDomain.trim()) {
-            formData.allowed_domain = allowedDomain.trim();
-        }
-        const levelNum = parseInt(level.trim(), 10);
-        if (!isNaN(levelNum)) {
-            formData.level = levelNum;
-        }
+        const data: CrawlFormData = { url };
+        if (userAgent.trim()) data.user_agent = userAgent.trim();
+        if (allowedDomain.trim()) data.allowed_domain = allowedDomain.trim();
+        const levelNum = parseInt(level, 10);
+        if (!isNaN(levelNum)) data.level = levelNum;
         if (useStorage) {
-            formData.use_storage = true;
-            if (clearStorage) {
-                formData.clear_storage = true;
-            }
+            data.use_storage = true;
+            if (clearStorage) data.clear_storage = true;
         }
-
-        onSubmit(formData);
+        onSubmit(data);
     };
 
     return (
@@ -99,9 +88,7 @@ export default function CrawlForm({ onSubmit, isRunning, onStop }: CrawlFormProp
                         checked={useStorage}
                         onChange={(e) => {
                             setUseStorage(e.target.checked);
-                            if (!e.target.checked) {
-                                setClearStorage(false);
-                            }
+                            if (!e.target.checked) setClearStorage(false);
                         }}
                         disabled={isRunning}
                     />
@@ -131,11 +118,7 @@ export default function CrawlForm({ onSubmit, isRunning, onStop }: CrawlFormProp
                         Stop Crawl
                     </button>
                 )}
-                <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => clearLogs()}
-                >
+                <button type="button" className="btn btn-secondary" onClick={() => clearLogs()}>
                     Clear Logs
                 </button>
             </div>

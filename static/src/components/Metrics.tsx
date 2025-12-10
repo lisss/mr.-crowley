@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { MetricsData, QueueData } from '../types';
-import { fetchMetrics, fetchQueue } from '../utils/api';
+import { MetricsData } from '../types/MetricsData';
+import { QueueData } from '../types/QueueData';
+import { fetchMetrics } from '../utils/api/fetchMetrics';
+import { fetchQueue } from '../utils/api/fetchQueue';
 
 export default function Metrics() {
     const [metrics, setMetrics] = useState<MetricsData | null>(null);
