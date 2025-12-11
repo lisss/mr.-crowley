@@ -1,5 +1,7 @@
 # Crawley
 
+![Crawley](./crowley.jpg)
+
 A web crawler with a simple web interface. Start crawls, watch progress, and see what URLs were visited.
 
 ## Features
@@ -20,7 +22,7 @@ npm run build
 python web.py
 ```
 
-Open `http://localhost:5000` in your browser.
+Open `http://localhost:5002` in your browser.
 
 ## How to Use
 
