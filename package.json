@@ -2,8 +2,9 @@
     "name": "crowley",
     "version": "1.0.0",
     "scripts": {
-        "build": "npm run build:less && tsc",
+        "build": "npm run build:less && tsc && npm run bundle",
         "build:less": "lessc static/css/styles.less static/css/styles.css",
+        "bundle": "node scripts/bundle.js",
         "watch": "tsc --watch",
         "watch:less": "lessc --watch static/css/styles.less static/css/styles.css"
     },
