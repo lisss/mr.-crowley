@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, send_from_directory, jsonify
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 
 try:
     from routes import crawl, redis, visited_urls
@@ -18,7 +18,11 @@ def index():
 
 @app.route("/static/<path:path>")
 def serve_static(path):
-    return send_from_directory("static", path)
+    try:
+        return send_from_directory("static", path)
+    except Exception as e:
+        print(f"Error serving static file {path}: {e}", file=sys.stderr)
+        return jsonify({"error": f"File not found: {path}"}), 404
 
 
 @app.route("/api/health")

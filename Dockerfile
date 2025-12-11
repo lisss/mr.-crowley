@@ -26,6 +26,7 @@ COPY extractor ./extractor
 COPY fetcher.py ./
 COPY storage.py ./
 COPY static/index.html ./static/index.html
+COPY static/dist ./static/dist
 
 EXPOSE 5000
 
